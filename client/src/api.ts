@@ -62,7 +62,7 @@ export const searchCatalog = (query: string): Promise<ProductSummary[]> =>
   fetchJson(`/api/catalog/search?q=${encodeURIComponent(query)}`);
 
 /**
- * Retries a message by its ID.
+ * Re-runs extraction and matching for a message by its ID.
  *
  * @param messageId - The ID of the message to retry.
  *
@@ -83,7 +83,7 @@ export const sendSms = (from: string, body: string): Promise<InboundMessage> =>
   postJson("/api/inbound/sms", {
     from,
     body,
-    providerMessageId: `ui-${crypto.randomUUID()}`,
+    providerMessageId: `ui-${crypto.randomUUID()}`
   });
 
 /**

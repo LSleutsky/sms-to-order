@@ -77,6 +77,19 @@ export default function MessageDetail({ messageId, onChanged }: MessageDetailPro
         <pre className="mt-3 rounded-lg bg-slate-50 p-4 font-mono text-sm whitespace-pre-wrap text-slate-800">
           {message.body}
         </pre>
+        {message.status === "extracted" && (
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              disabled={retryState.busy}
+              type="button"
+              onClick={handleRetry}
+            >
+              {retryState.busy ? "Re-running..." : "Re-run extraction"}
+            </button>
+            {retryState.error !== null && <p className="text-xs text-red-700">Re-run failed: {retryState.error}</p>}
+          </div>
+        )}
         {message.notes.length > 0 && (
           <ul className="mt-3 space-y-1 text-sm text-slate-600">
             {message.notes.map((note) => (
@@ -90,6 +103,7 @@ export default function MessageDetail({ messageId, onChanged }: MessageDetailPro
           <p className="text-sm text-red-800">
             Extraction did not run. Reason: <code>{message.unparsedReason}</code>.
             {message.unparsedReason === "no_api_key" && " Set ANTHROPIC_API_KEY and restart the server."}
+            {message.unparsedReason === "empty_output" && " The model returned no lines and no notes. Retry."}
           </p>
           <button
             className="mt-3 rounded-lg bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-50"

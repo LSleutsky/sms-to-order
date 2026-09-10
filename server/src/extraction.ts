@@ -101,6 +101,16 @@ export const extractLineItems = async (
       };
     }
 
+    const hasNoLines = response.parsed_output.lines.length === 0;
+    const hasNoWords = response.parsed_output.notes.every((note) => !/[a-z0-9]/i.test(note));
+
+    if (hasNoLines && hasNoWords) {
+      return {
+        ok: false,
+        reason: "empty_output"
+      };
+    }
+
     return {
       ok: true,
       extracted: response.parsed_output

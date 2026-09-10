@@ -32,7 +32,7 @@ const readOrderLines = (body: unknown): OrderLineInput[] | null => {
 };
 
 /**
- * Routes under /api/messages: the queue, one message, retry extraction, and accept as an order.
+ * Routes under /api/messages: the queue, one message, re-run extraction, and accept as an order.
  *
  * @param database - Open SQLite connection.
  * @param extract - Runs extraction on a raw message body.
@@ -72,8 +72,8 @@ export const messagesRouter = (
       return;
     }
 
-    if (message.status !== "unparsed") {
-      response.status(409).json({ error: "Only unparsed messages can be retried." });
+    if (message.status === "processed") {
+      response.status(409).json({ error: "An accepted message cannot be re-extracted." });
 
       return;
     }
