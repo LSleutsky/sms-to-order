@@ -50,3 +50,22 @@ The inbound endpoint is `POST /api/inbound/sms` with `from`, `body`, and `provid
 - `docs/DECISIONS.md`, the log as I went, with what I picked and what I passed on.
 - `docs/OUT-OF-SCOPE.md`, what I left out and how it lands in production.
 - `CLAUDE.md` and `.claude/commands/`, how I ran the build.
+
+## Development
+
+Total planning and implementation time was 5 hours 10 minutes, from opening the sample CSV, to the brainstorming and mental models, to the last commit.
+
+By phase:
+
+| Phase | Time |
+|---|---|
+| Build plan, tool rules, and phase commands, before any code | 1h 45m |
+| Fixtures, ten texts by hand | 10m |
+| Phase 0, scaffold and Docker | 40m |
+| Phase 1, catalog load, part-number index, search | 40m |
+| Phase 2, inbound, extraction, seeding | 35m |
+| Phase 3, matcher, scores table, cutoff | 20m |
+| Phase 4, review UI, send box, order view | 45m |
+| Phase 5, clean Docker run, docs | 15m |
+
+The planning block was the biggest one on purpose. Everything after it was the tool doing what the plan said and me reading output at the stops.
