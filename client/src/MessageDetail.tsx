@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { fetchMessage, retryMessage } from "./api";
+import OrderSummary from "./OrderSummary";
 import ReviewForm from "./ReviewForm";
 import { type InboundMessage } from "./types";
 
@@ -101,10 +102,8 @@ export default function MessageDetail({ messageId, onChanged }: MessageDetailPro
           {retryState.error !== null && <p className="mt-2 text-sm text-red-800">Retry failed: {retryState.error}</p>}
         </section>
       )}
-      {message.status === "processed" && (
-        <section className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-800">
-          This message was accepted as an order.
-        </section>
+      {message.status === "processed" && message.order !== null && (
+        <OrderSummary lineCount={message.lines.length} order={message.order} />
       )}
       {message.status === "extracted" && (
         <ReviewForm

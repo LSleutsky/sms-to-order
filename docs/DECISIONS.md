@@ -94,3 +94,11 @@ Mine. Claude asked whether the raw text should highlight which span each extract
 ### 19. No accessibility work
 
 Mine. I deliberately did not do accessibility work beyond what the browser gives for free with buttons, labels, and inputs. The queue view is the primary interaction point and it is a list of buttons, and I did not have the bandwidth on this build to do the rest properly. It goes in the out-of-scope list rather than being half done.
+
+### 20. A send box in the queue
+
+Mine. The plan mocked the SMS provider as an endpoint and nothing else, which meant curl was the only way to get a new text in. I wanted to type a text and watch it land in the queue, the way a reviewer would see one arrive, so the queue column has a small send form at the bottom. It posts to the same inbound endpoint with a generated provider message id. Nothing else changed. It stands in for the provider and nothing more.
+
+### 21. An accepted message shows the order
+
+Mine. Once a message was accepted the detail pane said so and nothing else, and the queue card still showed the review counts. That reads like the order went nowhere. Accepting now returns the message with its order, the pane lists every kept line with its quantity and product, and the card says how many lines were ordered and how many were rejected. The order was always in the database. The reviewer just could not see it.

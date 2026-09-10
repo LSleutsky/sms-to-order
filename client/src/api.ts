@@ -72,14 +72,29 @@ export const retryMessage = (messageId: number): Promise<InboundMessage> =>
   postJson(`/api/messages/${messageId}/retry`);
 
 /**
+ * Sends a text into the inbound endpoint the way an SMS provider would.
+ *
+ * @param from - The sender's phone number.
+ * @param body - The text as typed.
+ *
+ * @returns {Promise<InboundMessage>} The stored message after extraction and matching.
+ */
+export const sendSms = (from: string, body: string): Promise<InboundMessage> =>
+  postJson("/api/inbound/sms", {
+    from,
+    body,
+    providerMessageId: `ui-${crypto.randomUUID()}`,
+  });
+
+/**
  * Accepts a message by its ID and applies the given edits.
  *
  * @param messageId - The ID of the message to accept.
  * @param edits - The edits to apply to the message.
  *
- * @returns {Promise<unknown>} The result of the acceptance.
+ * @returns {Promise<InboundMessage>} The message with its accepted order.
  */
-export const acceptMessage = (messageId: number, edits: Record<number, LineEdit>): Promise<unknown> =>
+export const acceptMessage = (messageId: number, edits: Record<number, LineEdit>): Promise<InboundMessage> =>
   postJson(`/api/messages/${messageId}/accept`, {
     lines: Object.entries(edits).map(([lineId, edit]) => ({
       lineId: Number(lineId),

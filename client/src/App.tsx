@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchQueue } from "./api";
 import MessageDetail from "./MessageDetail";
 import Queue from "./Queue";
+import SendText from "./SendText";
 import { type QueueEntry } from "./types";
 
 type QueueState =
@@ -38,16 +39,24 @@ export default function App() {
         <span className="text-sm text-slate-500">Review queue</span>
       </header>
       <div className="flex min-h-0 flex-1">
-        <aside className="w-96 shrink-0 overflow-y-auto border-r border-slate-200 bg-white">
-          {queueState.status === "loading" && <p className="p-4 text-sm text-slate-500">Loading queue...</p>}
-          {queueState.status === "error" && (
-            <p className="p-4 text-sm text-red-700">
-              Could not load the queue: {queueState.message}. Check the server and reload.
-            </p>
-          )}
-          {queueState.status === "ready" && (
-            <Queue entries={queueState.entries} selectedId={selectedId} onSelect={setSelectedId} />
-          )}
+        <aside className="flex w-96 shrink-0 flex-col border-r border-slate-200 bg-white">
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {queueState.status === "loading" && <p className="p-4 text-sm text-slate-500">Loading queue...</p>}
+            {queueState.status === "error" && (
+              <p className="p-4 text-sm text-red-700">
+                Could not load the queue: {queueState.message}. Check the server and reload.
+              </p>
+            )}
+            {queueState.status === "ready" && (
+              <Queue entries={queueState.entries} selectedId={selectedId} onSelect={setSelectedId} />
+            )}
+          </div>
+          <SendText
+            onSent={(message) => {
+              loadQueue();
+              setSelectedId(message.id);
+            }}
+          />
         </aside>
         <main className="min-w-0 flex-1 overflow-y-auto p-6">
           {selectedId === null ? (

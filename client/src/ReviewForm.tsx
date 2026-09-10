@@ -40,9 +40,9 @@ export default function ReviewForm({ message, onAccepted }: ReviewFormProps) {
   const handleAccept = () => {
     setAcceptState({ busy: true, error: null });
     acceptMessage(message.id, edits)
-      .then(() => {
+      .then((accepted) => {
         setAcceptState({ busy: false, error: null });
-        onAccepted({ ...message, status: "processed" });
+        onAccepted(accepted);
       })
       .catch((error: unknown) => {
         setAcceptState({ busy: false, error: error instanceof Error ? error.message : "Unknown error" });

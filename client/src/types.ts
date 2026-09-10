@@ -27,6 +27,19 @@ export interface MessageLine {
   candidates: Candidate[];
 }
 
+export interface OrderLine extends ProductSummary {
+  lineId: number;
+  rawText: string;
+  unit: string | null;
+  quantity: number;
+}
+
+export interface Order {
+  id: number;
+  acceptedAt: string;
+  lines: OrderLine[];
+}
+
 export interface InboundMessage {
   id: number;
   providerMessageId: string;
@@ -37,6 +50,7 @@ export interface InboundMessage {
   unparsedReason: string | null;
   notes: string[];
   lines: MessageLine[];
+  order: Order | null;
 }
 
 export interface QueueEntry {
@@ -49,6 +63,7 @@ export interface QueueEntry {
   lineCount: number;
   matchedCount: number;
   needsReviewCount: number;
+  orderedCount: number;
 }
 
 export interface LineEdit {

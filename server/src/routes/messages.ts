@@ -121,7 +121,15 @@ export const messagesRouter = (
       return;
     }
 
-    response.json(acceptOrder(database, message.id, lines));
+    acceptOrder(database, message.id, lines);
+
+    const accepted = findMessageById(database, message.id);
+
+    if (accepted === null) {
+      throw new Error(`Message ${message.id} vanished after accepting its order`);
+    }
+
+    response.json(accepted);
   });
 
   return router;

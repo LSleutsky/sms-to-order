@@ -21,6 +21,20 @@ const STATUS_LABELS: Record<QueueEntry["status"], { label: string; className: st
   }
 };
 
+const describeLines = (entry: QueueEntry): string => {
+  if (entry.status === "unparsed") {
+    return "No lines extracted";
+  }
+
+  if (entry.status === "processed") {
+    const rejectedCount = entry.lineCount - entry.orderedCount;
+
+    return `${entry.orderedCount} ordered${rejectedCount > 0 ? `, ${rejectedCount} rejected` : ""}`;
+  }
+
+  return `${entry.matchedCount} matched, ${entry.needsReviewCount} to review, ${entry.lineCount} lines`;
+};
+
 /**
  * The list of inbound messages, newest first.
  *
@@ -53,11 +67,7 @@ export default function Queue({ entries, selectedId, onSelect }: QueueProps) {
                 </span>
               </div>
               <p className="mt-1 truncate text-sm text-slate-600">{entry.firstLine}</p>
-              <p className="mt-1 text-xs text-slate-500">
-                {entry.status === "unparsed"
-                  ? "No lines extracted"
-                  : `${entry.matchedCount} matched, ${entry.needsReviewCount} to review, ${entry.lineCount} lines`}
-              </p>
+              <p className="mt-1 text-xs text-slate-500">{describeLines(entry)}</p>
             </button>
           </li>
         );
