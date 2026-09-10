@@ -4,6 +4,8 @@ import { type ExtractedLine, type ExtractionOutcome } from "./extraction.js";
 import { type MatchStatus, type MatchableProduct, matchStatusFor } from "./matcher.js";
 import { type StoredCandidate, findLineCandidates, matchMessageLines } from "./matching.js";
 
+export type MessageStatus = "extracted" | "unparsed" | "processed";
+
 export interface InboundSms {
   from: string;
   body: string;
@@ -23,10 +25,22 @@ export interface InboundMessage {
   from: string;
   body: string;
   receivedAt: string;
-  status: "extracted" | "unparsed";
+  status: MessageStatus;
   unparsedReason: string | null;
   notes: string[];
   lines: MessageLine[];
+}
+
+export interface QueueEntry {
+  id: number;
+  providerMessageId: string;
+  from: string;
+  receivedAt: string;
+  status: MessageStatus;
+  firstLine: string;
+  lineCount: number;
+  matchedCount: number;
+  needsReviewCount: number;
 }
 
 interface MessageRow {
@@ -35,7 +49,7 @@ interface MessageRow {
   sender: string;
   body: string;
   received_at: string;
-  status: "extracted" | "unparsed";
+  status: MessageStatus;
   unparsed_reason: string | null;
   notes: string;
 }
@@ -82,22 +96,7 @@ export const createMessageTables = (database: Database): void => {
   `);
 };
 
-/**
- * Reads one message with its lines.
- *
- * @param database - Open SQLite connection.
- * @param providerMessageId - The provider's id for the message.
- *
- * @returns {InboundMessage | null} The message, or null when none has that id.
- */
-export const findMessage = (database: Database, providerMessageId: string): InboundMessage | null => {
-  const row = database.prepare("SELECT * FROM messages WHERE provider_message_id = ?").get(providerMessageId) as
-    MessageRow | undefined;
-
-  if (row === undefined) {
-    return null;
-  }
-
+const readMessage = (database: Database, row: MessageRow): InboundMessage => {
   const lineRows = database
     .prepare("SELECT * FROM message_lines WHERE message_id = ? ORDER BY position")
     .all(row.id) as LineRow[];
@@ -127,6 +126,123 @@ export const findMessage = (database: Database, providerMessageId: string): Inbo
       };
     })
   };
+};
+
+/**
+ * Reads one message with its lines by the provider's id.
+ *
+ * @param database - Open SQLite connection.
+ * @param providerMessageId - The provider's id for the message.
+ *
+ * @returns {InboundMessage | null} The message, or null when none has that id.
+ */
+export const findMessage = (database: Database, providerMessageId: string): InboundMessage | null => {
+  const row = database.prepare("SELECT * FROM messages WHERE provider_message_id = ?").get(providerMessageId) as
+    MessageRow | undefined;
+
+  return row === undefined ? null : readMessage(database, row);
+};
+
+/**
+ * Reads one message with its lines by its own id.
+ *
+ * @param database - Open SQLite connection.
+ * @param messageId - The message id.
+ *
+ * @returns {InboundMessage | null} The message, or null when none has that id.
+ */
+export const findMessageById = (database: Database, messageId: number): InboundMessage | null => {
+  const row = database.prepare("SELECT * FROM messages WHERE id = ?").get(messageId) as MessageRow | undefined;
+
+  return row === undefined ? null : readMessage(database, row);
+};
+
+/**
+ * Lists every message for the queue, newest first, with match counts.
+ *
+ * @param database - Open SQLite connection.
+ *
+ * @returns {QueueEntry[]} Queue entries.
+ */
+export const listQueue = (database: Database): QueueEntry[] => {
+  const rows = database.prepare("SELECT * FROM messages ORDER BY received_at DESC, id DESC").all() as MessageRow[];
+
+  return rows.map((row) => {
+    const message = readMessage(database, row);
+
+    return {
+      id: message.id,
+      providerMessageId: message.providerMessageId,
+      from: message.from,
+      receivedAt: message.receivedAt,
+      status: message.status,
+      firstLine: message.body.split("\n")[0],
+      lineCount: message.lines.length,
+      matchedCount: message.lines.filter((line) => line.matchStatus === "matched").length,
+      needsReviewCount: message.lines.filter((line) => line.matchStatus === "needs_review").length
+    };
+  });
+};
+
+/**
+ * Runs extraction for a stored message and records the outcome, replacing any earlier lines.
+ *
+ * @param database - Open SQLite connection.
+ * @param messageId - The stored message.
+ * @param extract - Runs extraction on the raw body.
+ * @param products - The catalog in matchable form.
+ *
+ * @returns {Promise<InboundMessage>} The message after extraction and matching.
+ */
+export const extractStoredMessage = async (
+  database: Database,
+  messageId: number,
+  extract: (messageBody: string) => Promise<ExtractionOutcome>,
+  products: MatchableProduct[]
+): Promise<InboundMessage> => {
+  const row = database.prepare("SELECT * FROM messages WHERE id = ?").get(messageId) as MessageRow | undefined;
+
+  if (row === undefined) {
+    throw new Error(`Message ${messageId} does not exist`);
+  }
+
+  const outcome = await extract(row.body);
+
+  if (!outcome.ok) {
+    database
+      .prepare("UPDATE messages SET status = 'unparsed', unparsed_reason = ? WHERE id = ?")
+      .run(outcome.reason, messageId);
+
+    return readMessage(database, row);
+  }
+
+  const insertLine = database.prepare(
+    `INSERT INTO message_lines (message_id, position, raw_text, quantity, unit, description, part_number)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  );
+
+  database.transaction(() => {
+    database
+      .prepare("DELETE FROM line_candidates WHERE line_id IN (SELECT id FROM message_lines WHERE message_id = ?)")
+      .run(messageId);
+    database.prepare("DELETE FROM message_lines WHERE message_id = ?").run(messageId);
+    outcome.extracted.lines.forEach((line, index) => {
+      insertLine.run(messageId, index + 1, line.rawText, line.quantity, line.unit, line.description, line.partNumber);
+    });
+    database
+      .prepare("UPDATE messages SET status = 'extracted', unparsed_reason = NULL, notes = ? WHERE id = ?")
+      .run(JSON.stringify(outcome.extracted.notes), messageId);
+  })();
+
+  matchMessageLines(database, messageId, products);
+
+  const stored = findMessageById(database, messageId);
+
+  if (stored === null) {
+    throw new Error(`Message ${messageId} vanished after extraction`);
+  }
+
+  return stored;
 };
 
 /**
@@ -160,35 +276,6 @@ export const ingestInboundSms = async (
     .run(sms.providerMessageId, sms.from, sms.body, new Date().toISOString());
 
   const messageId = Number(insertedMessage.lastInsertRowid);
-  const outcome = await extract(sms.body);
 
-  if (!outcome.ok) {
-    database
-      .prepare("UPDATE messages SET status = 'unparsed', unparsed_reason = ? WHERE id = ?")
-      .run(outcome.reason, messageId);
-  } else {
-    const insertLine = database.prepare(
-      `INSERT INTO message_lines (message_id, position, raw_text, quantity, unit, description, part_number)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    );
-
-    database.transaction(() => {
-      outcome.extracted.lines.forEach((line, index) => {
-        insertLine.run(messageId, index + 1, line.rawText, line.quantity, line.unit, line.description, line.partNumber);
-      });
-      database
-        .prepare("UPDATE messages SET status = 'extracted', unparsed_reason = NULL, notes = ? WHERE id = ?")
-        .run(JSON.stringify(outcome.extracted.notes), messageId);
-    })();
-
-    matchMessageLines(database, messageId, products);
-  }
-
-  const stored = findMessage(database, sms.providerMessageId);
-
-  if (stored === null) {
-    throw new Error(`Message ${sms.providerMessageId} vanished after insert`);
-  }
-
-  return stored;
+  return extractStoredMessage(database, messageId, extract, products);
 };

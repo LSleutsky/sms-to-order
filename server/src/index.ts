@@ -10,8 +10,10 @@ import { extractLineItems } from "./extraction.js";
 import { readFixtureMessages } from "./fixtures.js";
 import { createCandidateTable, loadMatchableProducts } from "./matching.js";
 import { createMessageTables, ingestInboundSms } from "./messages.js";
+import { createOrderTables } from "./orders.js";
 import { catalogRouter } from "./routes/catalog.js";
 import { inboundRouter } from "./routes/inbound.js";
+import { messagesRouter } from "./routes/messages.js";
 
 const config = loadConfig();
 const database = openDatabase(config.dbPath);
@@ -21,6 +23,7 @@ const extract = (messageBody: string) => extractLineItems(anthropic, messageBody
 
 createMessageTables(database);
 createCandidateTable(database);
+createOrderTables(database);
 
 const products = loadMatchableProducts(database);
 const app = express();
@@ -36,6 +39,7 @@ app.get("/api/health", (_request, response) => {
 
 app.use("/api/catalog", catalogRouter(database));
 app.use("/api/inbound", inboundRouter(database, extract, products));
+app.use("/api/messages", messagesRouter(database, extract, products));
 
 if (config.isProduction) {
   const clientDistDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../client/dist");

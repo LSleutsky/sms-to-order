@@ -76,3 +76,21 @@ Claude's implementation suggestions, accepted. Matching has to be auditable. Whe
 ### 15. The cutoff is 0.85
 
 Claude's proposal, accepted. Claude printed the scores table for every fixture line, `docs/FIXTURE-SCORES.md`, and read it back to me. Every exact hit was right. Every fuzzy top candidate was right except the pex rings at 0.29, which are not in the catalog. The best a wrong candidate scored anywhere in the table was 0.83, the 18 inch grab bar and the 6x2 san tee, both as second choices. Claude proposed auto-matching at 0.85 and above and sending everything below to the reviewer with the top three, and I agreed. That auto-matches 15 of 23 lines and sends the hex bushing at 0.83, the copper tube at 0.67, and the pex rings to review. The cutoff came from one table of ten fixtures. It drifts the day the catalog changes, and in production it gets re-derived from how often a reviewer changes an auto-matched line.
+
+## Phase 4. Review UI
+
+### 16. Top three candidates for low-confidence lines
+
+Mine. A line below the cutoff shows the reviewer the top three candidates with their scores, plus a search box on the catalog. I rejected best-guess-and-edit, where a single low-score guess is pre-filled. That is a trap, since the reviewer confirms it because it is there. I rejected blocking the whole order until every line resolves, since that punishes the lines that matched fine. Three candidates make the uncertainty visible without a blank search every time.
+
+### 17. Never auto-place
+
+Claude's proposal, accepted. Nothing becomes an order without a person clicking accept, even when every line is an exact hit. A wrong order at a plumbing counter is a truck rolling with the wrong parts, and a one-tap confirm on a clean order costs one tap. Auto-placing high-confidence orders is a production call to make with data on how often those lines are actually right.
+
+### 18. No span highlighting
+
+Mine. Claude asked whether the raw text should highlight which span each extracted line came from. I said out of scope. It is nice to have and does not change whether the reviewer can do the job, since every line row already shows the exact raw text it came from. It is noted in the out-of-scope list.
+
+### 19. No accessibility work
+
+Mine. I deliberately did not do accessibility work beyond what the browser gives for free with buttons, labels, and inputs. The queue view is the primary interaction point and it is a list of buttons, and I did not have the bandwidth on this build to do the rest properly. It goes in the out-of-scope list rather than being half done.
