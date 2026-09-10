@@ -5,6 +5,8 @@ export interface AppConfig {
   port: number;
   dbPath: string;
   catalogCsvPath: string;
+  fixturesDir: string;
+  seedFixtures: boolean;
   anthropicApiKey: string | null;
   isProduction: boolean;
 }
@@ -30,6 +32,8 @@ export const loadConfig = (): AppConfig => {
     port,
     dbPath: process.env.DB_PATH?.trim() || path.join(repoRootDir, "data/app.db"),
     catalogCsvPath: path.join(repoRootDir, "data/products_pc328_sample_100_anonymized.csv"),
+    fixturesDir: path.join(repoRootDir, "fixtures/sms"),
+    seedFixtures: process.env.SEED_FIXTURES?.trim() === "true",
     anthropicApiKey: rawApiKey === undefined || rawApiKey === "" ? null : rawApiKey,
     isProduction: process.env.NODE_ENV === "production"
   };

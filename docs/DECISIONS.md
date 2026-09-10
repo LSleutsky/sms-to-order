@@ -44,3 +44,25 @@ What counts as a token came from Claude. I wrote a rough rule (*a digit plus a l
 Claude proposal, accepted. At the required stop, Claude showed me ten rows with their extracted tokens and proposed the column roles. I agreed with all of it. Key is `hajoca_product_id`, present and unique on all 100 rows. Matching text is description. Brand is `manufacturer_cleaned`, because manufacturer is `Unknown` on every row. The `sku` is a secondary exact key where present. Everything else is display only. The `category` is always `General`, `uom` always `EA`, a`vailability` always `in_stock`, `catalog_no` empty, `hajoca_profit_center` is `328` everywhere, `price` and `quantity` read anonymized. Building stock or price logic on columns that are identical on every row is building on nothing.
 
 Claude also proposed two changes to the token rule I had written, and I took both. First, drop the false tokens the rule let through. Those were quantities with units (*120V, 18KW, 40GAL, 1.28GPF, 10GA, 18IN, 2HDL, 3-HOLE*), sizes with a suffix glued on (*2x2T, 3/8Fx3/8OD, 1/2xCLOSE, 316/L*), pipe grades (*SCH40, SCH80, CPVC80*), and NON-AB1953, which is a compliance note. Second, my rule required a letter or hyphen, which missed plain-digit numbers like M/R 77020, AOS 100109699, and the alternate 0009431. Those are real part numbers, so five or more plain digits now count. The index went from 180 tokens to 160, and every one I can see is a number a contractor *could* type.
+
+## Phase 2. Inbound and extraction
+
+### 9. Raw message stored untouched, before anything else
+
+Mine. The text goes to disk exactly as received, before extraction starts. Extraction will improve, and reparsing old messages against a better prompt is free if the raw text is there. It's also the audit trail when a contractor says "that's not what I texted". I rejected storing only the extracted lines, which would make every prompt change a data loss.
+
+### 10. Inbound is idempotent on the provider message ID
+
+Mine. A repeat of the same provider message ID returns the existing record instead of creating a second one. Providers retry on timeout, and without this one slow extraction call turns into two duplicate orders.
+
+### 11. The extraction schema, with notes as a list
+
+Claude's proposal, accepted. Each line has `rawText`, `quantity`, `unit`, `description`, and `partNumber`. The `rawText` is the exact span the line came from, so a reviewer can see it. The `quantity` and `unit` are `null` when the sender gave none, and `description` is the item with those stripped out, which is what fuzzy matching will run on. The `partNumber` is the number as typed. Claude also recommended notes as a list of strings, one entry per separate thought, over a single string or a string-or-list union, and I took that. A delivery note and a question in one text are two things. A message that is not an order has zero lines and its text lands in notes.
+
+### 12. A missing key and a failed call are states, not crashes
+
+Mine. The server starts without a key, the health endpoint says so, and every inbound message is stored and lands as unparsed with a reason of `no_api_key`. A failed API call does the same with the error as the reason, no retry. I rejected crashing on boot and retrying inside the request. A reviewer should be able to run this with no key and still see the queue and raw messages, and a counter person should never lose a text because a third party had a bad minute. I hit this state for real during the build. My Claude account had no usage credits remaining for API use, so every call came back 400, and all ten fixtures were sitting in the queue as unparsed with that reason.
+
+### 13. First extraction pass needed no corrections
+
+Mine, from reading the output. I read raw next to extracted for all ten fixtures and found nothing to fix. Quantities, units, and part numbers were right, `90s` after a size came out as elbows and not a quantity, `x2` became quantity 2, `some` became no quantity, and the one text that was not an order came out as zero lines with two notes. I had planned for a prompt change here and it was not needed, so there is one commit for this phase instead of two.

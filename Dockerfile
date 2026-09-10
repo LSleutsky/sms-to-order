@@ -34,6 +34,7 @@ COPY --from=build --chown=app:app /app/server/node_modules ./server/node_modules
 COPY --from=build --chown=app:app /app/server/dist ./server/dist
 COPY --from=build --chown=app:app /app/client/dist ./client/dist
 COPY --from=build --chown=app:app /app/data/*.csv ./data/
+COPY --from=build --chown=app:app /app/fixtures ./fixtures
 
 USER app
 EXPOSE 3000
