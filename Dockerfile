@@ -33,6 +33,7 @@ COPY --from=build --chown=app:app /app/server/package.json ./server/package.json
 COPY --from=build --chown=app:app /app/server/node_modules ./server/node_modules
 COPY --from=build --chown=app:app /app/server/dist ./server/dist
 COPY --from=build --chown=app:app /app/client/dist ./client/dist
+COPY --from=build --chown=app:app /app/data/*.csv ./data/
 
 USER app
 EXPOSE 3000

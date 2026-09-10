@@ -16,6 +16,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
     "better-sqlite3": "^13.0.3",
+    "csv-parse": "^7.0.2",
     "express": "^5.2.1"
   },
   "devDependencies": {

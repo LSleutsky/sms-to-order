@@ -44,11 +44,14 @@ My standing rules, trimmed to what applies here.
 
 - Explicit over implicit. Semantic names, never `min`, `data`, `result`.
 - Comments explain why, only where the why isn't obvious. Never what.
+- When importing `type` from a package, use `import { type Type } from "package"` instead of `import type { Type } from "package"`.
 - `interface` and `type` declarations directly after imports.
 - JSDoc on exported functions, hooks, and components only: one short description, `@param` block, `@returns {type} ...`. Nothing on internal helpers, `useEffect`, or `useCallback`. Follow: 1 line description, then whitespace before first `@param`, then whitespace before `@returns`.
 - TypeScript is the data contract. Never widen a type to get past an error, no `any`, no assertions to paper over a bad data flow. Fix the flow. Provide good reason if using `unknown` type.
 - Verify an API exists before using it: check the package's `.d.ts` under `node_modules`. If you can't confirm it, don't use it.
 - React: functional components, `export default function`, one component per file, state at the lowest level that needs it, derived values never stored in state, server state never copied into `useState`. Every async path has loading, empty, error, and success states. Controls are labeled and keyboard operable. Reserve layout space with `min-w-*` and `min-h-*`, never placeholder characters.
+- Prefer using `const` over `function` where functionally equivalent.
+- Group single-line `const` declarations together, add whitespace before and after multi-line `const` declarations.
 - Errors: no empty catch blocks. Expected failures are explicit states. Unexpected failures propagate. User-facing errors say what to do next.
 - Rule of three: allow a second copy, extract on the third.
 - No speculative flags, options, or abstractions. No phantom features: never document or validate something that isn't built.

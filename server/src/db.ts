@@ -7,6 +7,7 @@ import Database from "better-sqlite3";
  * Opens the SQLite database, creating its directory if needed.
  *
  * @param dbPath - File path for the database.
+ *
  * @returns {Database.Database} An open connection in WAL mode.
  */
 export const openDatabase = (dbPath: string): Database.Database => {
