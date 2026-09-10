@@ -121,6 +121,7 @@ export default function MessageDetail({ messageId, onChanged }: MessageDetailPro
       )}
       {message.status === "extracted" && (
         <ReviewForm
+          key={message.lines.map((line) => line.id).join(",")}
           message={message}
           onAccepted={(accepted) => {
             setDetailState({ status: "ready", message: accepted });
