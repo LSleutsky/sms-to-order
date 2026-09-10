@@ -8,6 +8,7 @@ import { loadConfig } from "./config.js";
 import { openDatabase } from "./db.js";
 import { extractLineItems } from "./extraction.js";
 import { readFixtureMessages } from "./fixtures.js";
+import { createCandidateTable, loadMatchableProducts } from "./matching.js";
 import { createMessageTables, ingestInboundSms } from "./messages.js";
 import { catalogRouter } from "./routes/catalog.js";
 import { inboundRouter } from "./routes/inbound.js";
@@ -19,7 +20,9 @@ const anthropic = config.anthropicApiKey === null ? null : new Anthropic({ apiKe
 const extract = (messageBody: string) => extractLineItems(anthropic, messageBody);
 
 createMessageTables(database);
+createCandidateTable(database);
 
+const products = loadMatchableProducts(database);
 const app = express();
 
 app.use(express.json());
@@ -32,7 +35,7 @@ app.get("/api/health", (_request, response) => {
 });
 
 app.use("/api/catalog", catalogRouter(database));
-app.use("/api/inbound", inboundRouter(database, extract));
+app.use("/api/inbound", inboundRouter(database, extract, products));
 
 if (config.isProduction) {
   const clientDistDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../client/dist");
@@ -58,7 +61,7 @@ const seedFixturesIfEmpty = async (): Promise<void> => {
   }
 
   for (const sms of readFixtureMessages(config.fixturesDir)) {
-    const stored = await ingestInboundSms(database, sms, extract);
+    const stored = await ingestInboundSms(database, sms, extract, products);
 
     console.log(
       `Seeded ${stored.providerMessageId}: ${stored.status}${stored.unparsedReason ? ` (${stored.unparsedReason})` : ""}`

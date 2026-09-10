@@ -65,7 +65,6 @@ My global instructions ask permission before installing packages, starting dev s
 
 - No abstractions for a single call site.
 - No config layers, plugin systems, generic repositories, retry frameworks, feature flags, event buses.
-- One test file, the matcher, run against the fixtures.
 - No file over ~300 lines without asking.
 - Out-of-scope items get one or two sentences in `docs/OUT-OF-SCOPE.md`, never a stub or TODO.
 

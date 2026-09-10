@@ -1,7 +1,7 @@
 Read `CLAUDE.md` and `docs/BUILD-PLAN.md` in full.
 
 Scaffold:
-- pnpm workspace: `pnpm-workspace.yaml`; root `package.json` with `packageManager` pinned to the installed pnpm version and scripts `dev` (both packages in parallel), `build`, `start`, `typecheck`, `lint`, `test`, `seed`.
+- pnpm workspace: `pnpm-workspace.yaml`; root `package.json` with `packageManager` pinned to the installed pnpm version and scripts `dev` (both packages in parallel), `build`, `start`, `typecheck`, `lint`, `seed`.
 - `client/`: Vite, React, TypeScript, Tailwind v4 via `@tailwindcss/vite` with one `@import "tailwindcss"` stylesheet. Vite proxies `/api` to `http://localhost:3000`.
 - Bootstrap an ESLint and Prettier config, with `eslint.config.js` and `.prettierrc`, respectively. Use recommended configs from `eslint-config-prettier` and `eslint-plugin-prettier`. Add linting for Tailwind via `eslint-plugin-tailwindcss`. Add additional linting rules for prop ordering, prefer brackets for conditional expressions and loops.
 - `server/`: Express, TypeScript, better-sqlite3, Anthropic SDK. `tsx` for dev, `tsc` for build. Reads `PORT` and `DB_PATH` from env. `GET /api/health` returns `{ ok: true, extraction: "ready" | "no_api_key" }`. In production, serves `client/dist` static on the same port with a fallback to `index.html`.

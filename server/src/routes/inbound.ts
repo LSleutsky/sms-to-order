@@ -2,6 +2,7 @@ import { type Database } from "better-sqlite3";
 import { Router } from "express";
 
 import { type ExtractionOutcome } from "../extraction.js";
+import { type MatchableProduct } from "../matcher.js";
 import { type InboundSms, ingestInboundSms } from "../messages.js";
 
 const readInboundSms = (body: unknown): InboundSms | null => {
@@ -31,12 +32,14 @@ const readInboundSms = (body: unknown): InboundSms | null => {
  *
  * @param database - Open SQLite connection.
  * @param extract - Runs extraction on a raw message body.
+ * @param products - The catalog in matchable form.
  *
  * @returns {Router} Express router with POST /sms.
  */
 export const inboundRouter = (
   database: Database,
-  extract: (messageBody: string) => Promise<ExtractionOutcome>
+  extract: (messageBody: string) => Promise<ExtractionOutcome>,
+  products: MatchableProduct[]
 ): Router => {
   const router = Router();
 
@@ -49,7 +52,7 @@ export const inboundRouter = (
       return;
     }
 
-    response.json(await ingestInboundSms(database, sms, extract));
+    response.json(await ingestInboundSms(database, sms, extract, products));
   });
 
   return router;

@@ -35,4 +35,4 @@ Auth, multi-tenant, real deployment, real SMS provider, async extraction, observ
 
 ## If it runs long
 
-Cut in order: search box, notes field, quantity editing, retry button, matcher test. Never cut: raw storage, dedupe, scores table, Docker run, decision log.
+Cut in order: search box, notes field, quantity editing, retry button. Never cut: raw storage, dedupe, scores table, Docker run, decision log.

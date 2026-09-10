@@ -1,0 +1,29 @@
+# Fixture scores
+
+Every extracted line from the fixtures in fixtures/sms, with the top three catalog candidates the matcher produced and their scores. Exact means a part number in the text hit the part-number index. Everything else is the fuzzy score on normalized description tokens. Generated from the seeded database, no thresholds applied.
+
+| Line | Raw text | Top candidate | Second | Third |
+|---|---|---|---|---|
+| 01 L1 | 1 k-27428-bl towel ring | KOHLER K-27428-BL TOWEL RING (exact) | 141-F 1-1/2 FELT RING HANGER EG 1000150F 3300-0150FL (0.29) | KOHLER K-27291-2MB ELATE 9" TOWEL ARM 2MB (0.25) |
+| 02 L1 | 10 1/2 close nip brass | 1/2xCLOSE NIPPLE BRASS (1.00) | 1-1/2x2-1/2 NIPPLE BRASS (0.50) | 1-1/4x5 NIPPLE BLACK (0.25) |
+| 02 L2 | 4 2x2 san tap tee nh | 2x2T SAN TAP TEE NH (0.92) | 6x2 SAN TEE NH (0.83) | 2x1-1/2x2 STREET SAN TEE ABS (ABS404) (105127L) (5811-2) (0.50) |
+| 02 L3 | 6 3/4x7 nip galv | 3/4x7 NIPPLE GALV (1.00) | 3/4 X 2 SCH40 316/L SS NIPPLE (0.33) | 1-1/4x5 NIPPLE BLACK (0.25) |
+| 02 L4 | box of 1-1/2x3/4 hex bushing brass | LF 1-1/2x3/4 HEX BUSHING BRASS (0.83) | LF 1-1/2x1-1/4 HEX BUSHING BRASS (0.67) | 1-1/2x2-1/2 NIPPLE BRASS (0.44) |
+| 02 L5 | 2 2in pvc slip cap | 2" PVC/DWV SLIP CAP (PVC116) (193082) (P116-020) (0.89) | 2x1-1/2x1-1/2 REDUCING TEE BLACK (0.22) | 6x2 SAN TEE NH (0.20) |
+| 02 L6 | 3 4x3 red cplg galv | 4x3 REDUCING COUPLING GALV (1.00) | 3 COUPLING STYRENE HxH (P602) (0.44) | 1801-532 6x4" SxSxS RED TEE CPVC80 (0.36) |
+| 02 L7 | 1 6x2 san tee nh | 6x2 SAN TEE NH (1.00) | 2x2T SAN TAP TEE NH (0.77) | 2x1-1/2x2 STREET SAN TEE ABS (ABS404) (105127L) (5811-2) (0.50) |
+| 03 L1 | watts 1.5 prv, the union one. 2 of them. | WATTS LF25AUB-Z3 1-1/2" PRV FNPT X FNPT UNION (0009431) (0.86) | WILKINS 70XLDUC 3/4" PRV VALVE (34-70XLDUC) (0.43) | 2x1-1/2x1-1/2 REDUCING TEE BLACK (0.36) |
+| 04 L1 | 20 2 in pvc slip caps | 2" PVC/DWV SLIP CAP (PVC116) (193082) (P116-020) (0.89) | 2x1-1/2x1-1/2 REDUCING TEE BLACK (0.22) | 6x2 SAN TEE NH (0.20) |
+| 04 L2 | a 3 in brass cleanout plug | 3" UPC BRASS CLEANOUT PLUG (ABA178) (0.89) | 3 COUPLING STYRENE HxH (P602) (0.25) | 1-1/2x2-1/2 NIPPLE BRASS (0.25) |
+| 05 L1 | 2 kohler purist grab bar 2mb | KOHLER K-11893-2MB PURIST 24" GRAB BAR 2MB (1.00) | KOHLER K-25160-2MB COMPONENTS 18IN GRAB BAR 2MB (0.83) | KOHLER K-27291-2MB ELATE 9" TOWEL ARM 2MB (0.46) |
+| 05 L2 | 5 brass nipples 1-1/2 x 2-1/2 | 1-1/2x2-1/2 NIPPLE BRASS (1.00) | 1-1/2x2-1/2 XH NIPPLE BLACK (0.67) | 1/2xCLOSE NIPPLE BRASS (0.50) |
+| 05 L3 | 3 2-1/2 galv 90s | 2-1/2 90 ELBOW GALV (1.00) | 3/4 ST 90 ELBOW SPGXS CPVC CTS FLOWGUARD GOLD (CTS-2304)(4707-2) (0.31) | 1-1/2x2-1/2 NIPPLE BRASS (0.25) |
+| 06 L1 | 1 kholer k-5310-0 cimaron toilet wht | KOHLER K-5310-0 CIMARRON EF SKIRTED 2PC TLT ADA WHT 1.28GPF (exact) | ICERA C-5530.01 VISTA EF WALLHUNG TLT W/SEAT WHT (0.36) | KOHLER K-4775-0 BREVIA Q2 ROUND FRONT TOILET SEAT QUICK RELEASE WHITE (0.29) |
+| 06 L2 | 1 k-4775-0 seat | KOHLER K-4775-0 BREVIA Q2 ROUND FRONT TOILET SEAT QUICK RELEASE WHITE (exact) | ICERA C-5530.01 VISTA EF WALLHUNG TLT W/SEAT WHT (0.25) | KOHLER K-98804-CP-0 PUREWASH PUREWASH MANUAL EF BIDET SEAT WHT (0.25) |
+| 07 L1 | 4 bags 3/4 pex crimp rings | KOHLER K-27428-BL TOWEL RING (0.29) | 1829-007 3/4" SxS COUPLING CPVC80 (0.25) | 3/4x7 NIPPLE GALV (0.25) |
+| 07 L2 | 1 delta rp17443 lever handle | DELTA RP17443 LEVER HANDLE FOR LAV & T&S (exact) | DELTA RP2393 LEVER HANDLE ASSY (0.96) | KOHLER K-98068-4-CP ARIFACTS LEVER FAUCET *HANDLES ONLY* CP (0.40) |
+| 09 L1 | delta rp2393 handle x2 | DELTA RP2393 LEVER HANDLE ASSY (exact) | DELTA RP17443 LEVER HANDLE FOR LAV & T&S (0.54) | KOHLER K-98068-4-CP ARIFACTS LEVER FAUCET *HANDLES ONLY* CP (0.22) |
+| 09 L2 | 1 stick 3in type m copper | 3" x 20' "M" COPPER TUBE (0.67) | 4" x 20' "M" COPPER TUBE (0.44) | 3 COUPLING STYRENE HxH (P602) (0.25) |
+| 09 L3 | some 1-1/2 felt ring hangers | 141-F 1-1/2 FELT RING HANGER EG 1000150F 3300-0150FL (0.89) | KOHLER K-27428-BL TOWEL RING (0.29) | 1-1/2x2-1/2 NIPPLE BRASS (0.25) |
+| 10 L1 | 1 gerber maxwell 2pc 1.28 wht | GERBER WS-20-902 MAXWELL 2PC RF 1.28GPF TLT WHT (0.85) | KOHLER K-5310-0 CIMARRON EF SKIRTED 2PC TLT ADA WHT 1.28GPF (0.47) | GERBER HE-20-370 ULTRA FLUSH EF W/M B/O 1.28GPF TOILET WHT (0.45) |
+| 10 L2 | 1 insinkerator hwt300 tank | ISE HWT300 1300W Hot Water Tank 45469-ISE (exact) | ISE H-VIEW-SNSS Hot H2O Dispenser w/ Tank SN 44716A (0.28) | - |

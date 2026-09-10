@@ -66,3 +66,13 @@ Mine. The server starts without a key, the health endpoint says so, and every in
 ### 13. First extraction pass needed no corrections
 
 Mine, from reading the output. I read raw next to extracted for all ten fixtures and found nothing to fix. Quantities, units, and part numbers were right, `90s` after a size came out as elbows and not a quantity, `x2` became quantity 2, `some` became no quantity, and the one text that was not an order came out as zero lines with two notes. I had planned for a prompt change here and it was not needed, so there is one commit for this phase instead of two.
+
+## Phase 3. Matching
+
+### 14. Matching is code, not a model
+
+Mine. Matching has to be auditable. When a reviewer asks why the system suggested a 3/4 elbow instead of a 1/2, the answer is a score I can show. A model in the matching path can invent a part number that does not exist, so the matcher is a pure function. Exact first, on the part-number index and sku. Then fuzzy, a token-set similarity on normalized descriptions, where normalization brings every way of writing a size to one form, expands the shorthand in the catalog and in the texts (*nip, cplg, san tee, nh, galv, prv, wht, and the rest*), and drops part-number tokens because exact already handled them. A small fixed boost when the line names the brand in `manufacturer_cleaned`. Top three per line, stored against the line. I rejected embeddings and a hybrid that falls back to embeddings. That is the obvious next step if fuzzy recall is bad on real data, and that is a conversation to have with real data and if this was a scalable feature.
+
+### 15. The cutoff is 0.85
+
+Claude's proposal, accepted. Claude printed the scores table for every fixture line, `docs/FIXTURE-SCORES.md`, and read it back to me. Every exact hit was right. Every fuzzy top candidate was right except the pex rings at 0.29, which are not in the catalog. The best a wrong candidate scored anywhere in the table was 0.83, the 18 inch grab bar and the 6x2 san tee, both as second choices. Claude proposed auto-matching at 0.85 and above and sending everything below to the reviewer with the top three, and I agreed. That auto-matches 15 of 23 lines and sends the hex bushing at 0.83, the copper tube at 0.67, and the pex rings to review. The cutoff came from one table of ten fixtures. It drifts the day the catalog changes, and in production it gets re-derived from how often a reviewer changes an auto-matched line.

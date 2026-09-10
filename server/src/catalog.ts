@@ -203,7 +203,26 @@ export const loadCatalog = (database: Database, csvPath: string): number => {
       @hajoca_product_id, @sku, @description, @description_normalized, @category, @manufacturer,
       @manufacturer_cleaned, @uom, @hajoca_profit_center, @current_price, @availability, @qty_avail,
       @is_active, @status, @sell_qty, @pkg_qty, @pricing_qty, @catalog_no, @hist_purchases, @has_image
-    )
+    ) ON CONFLICT (hajoca_product_id) DO UPDATE SET
+      sku = excluded.sku,
+      description = excluded.description,
+      description_normalized = excluded.description_normalized,
+      category = excluded.category,
+      manufacturer = excluded.manufacturer,
+      manufacturer_cleaned = excluded.manufacturer_cleaned,
+      uom = excluded.uom,
+      hajoca_profit_center = excluded.hajoca_profit_center,
+      current_price = excluded.current_price,
+      availability = excluded.availability,
+      qty_avail = excluded.qty_avail,
+      is_active = excluded.is_active,
+      status = excluded.status,
+      sell_qty = excluded.sell_qty,
+      pkg_qty = excluded.pkg_qty,
+      pricing_qty = excluded.pricing_qty,
+      catalog_no = excluded.catalog_no,
+      hist_purchases = excluded.hist_purchases,
+      has_image = excluded.has_image
   `);
 
   const insertToken = database.prepare(
@@ -211,7 +230,7 @@ export const loadCatalog = (database: Database, csvPath: string): number => {
   );
 
   database.transaction(() => {
-    database.exec("DELETE FROM catalog_part_numbers; DELETE FROM catalog;");
+    database.exec("DELETE FROM catalog_part_numbers");
 
     for (const row of rows) {
       insertRow.run({

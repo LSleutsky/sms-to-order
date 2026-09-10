@@ -1,6 +1,8 @@
 import { type Database } from "better-sqlite3";
 
 import { type ExtractedLine, type ExtractionOutcome } from "./extraction.js";
+import { type MatchStatus, type MatchableProduct, matchStatusFor } from "./matcher.js";
+import { type StoredCandidate, findLineCandidates, matchMessageLines } from "./matching.js";
 
 export interface InboundSms {
   from: string;
@@ -11,6 +13,8 @@ export interface InboundSms {
 export interface MessageLine extends ExtractedLine {
   id: number;
   position: number;
+  matchStatus: MatchStatus;
+  candidates: StoredCandidate[];
 }
 
 export interface InboundMessage {
@@ -107,15 +111,21 @@ export const findMessage = (database: Database, providerMessageId: string): Inbo
     status: row.status,
     unparsedReason: row.unparsed_reason,
     notes: JSON.parse(row.notes) as string[],
-    lines: lineRows.map((lineRow) => ({
-      id: lineRow.id,
-      position: lineRow.position,
-      rawText: lineRow.raw_text,
-      quantity: lineRow.quantity,
-      unit: lineRow.unit,
-      description: lineRow.description,
-      partNumber: lineRow.part_number
-    }))
+    lines: lineRows.map((lineRow) => {
+      const candidates = findLineCandidates(database, lineRow.id);
+
+      return {
+        id: lineRow.id,
+        position: lineRow.position,
+        rawText: lineRow.raw_text,
+        quantity: lineRow.quantity,
+        unit: lineRow.unit,
+        description: lineRow.description,
+        partNumber: lineRow.part_number,
+        matchStatus: matchStatusFor(candidates),
+        candidates
+      };
+    })
   };
 };
 
@@ -125,13 +135,15 @@ export const findMessage = (database: Database, providerMessageId: string): Inbo
  * @param database - Open SQLite connection.
  * @param sms - The inbound text.
  * @param extract - Runs extraction on the raw body once the message is stored.
+ * @param products - The catalog in matchable form.
  *
  * @returns {Promise<InboundMessage>} The stored message. A repeated providerMessageId returns the existing one.
  */
 export const ingestInboundSms = async (
   database: Database,
   sms: InboundSms,
-  extract: (messageBody: string) => Promise<ExtractionOutcome>
+  extract: (messageBody: string) => Promise<ExtractionOutcome>,
+  products: MatchableProduct[]
 ): Promise<InboundMessage> => {
   const existing = findMessage(database, sms.providerMessageId);
 
@@ -168,6 +180,8 @@ export const ingestInboundSms = async (
         .prepare("UPDATE messages SET status = 'extracted', unparsed_reason = NULL, notes = ? WHERE id = ?")
         .run(JSON.stringify(outcome.extracted.notes), messageId);
     })();
+
+    matchMessageLines(database, messageId, products);
   }
 
   const stored = findMessage(database, sms.providerMessageId);
